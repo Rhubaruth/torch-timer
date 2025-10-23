@@ -18,6 +18,7 @@ class Timer(models.Model):
     created_at = models.DateTimeField(auto_now_add=True)
 
     init_duration = models.DateTimeField(blank=False, null=False)
+    effective_duration = models.DateTimeField(blank=False, null=False)
 
     effective_end_time = models.DateTimeField(blank=False, null=False)
     true_end_time = models.DateTimeField(null=True, default=None)
@@ -26,8 +27,3 @@ class Timer(models.Model):
         choices=TimerState,
         default=TimerState.RUNNING
     )
-
-    def get_effective_duration(self):
-        duration = self.effective_end_time - datetime()
-        # TODO: Check if duration is positive
-        return duration

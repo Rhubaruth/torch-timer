@@ -5,4 +5,5 @@ from . import views
 
 urlpatterns = [
     path("", views.index, name="index"),
+    path("add", views.timer_add, name="timer_add"),
 ]

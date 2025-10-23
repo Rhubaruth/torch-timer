@@ -1,0 +1,38 @@
+{% load static %}
+<!DOCTYPE html>
+<html>
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Torch Timer</title>
+    <link rel="stylesheet" href="{% static 'styles/templatemo-noir-fashion.css' %}">
+    <!-- <link rel="stylesheet" href="{% static 'styles/main.css' %}"> -->
+</head>
+
+
+<body>
+    <header> 
+        <nav id="navbar">
+            <div class="nav-container">
+                <a href="#home" class="logo-link">
+                    <span class="logo-text">ShadowDark</span>
+                </a>
+                <ul class="nav-links">
+                    <li><a href="#home" class="nav-link active">Home</a></li>
+                    <li><a href="#collections" class="nav-link">Collections</a></li>
+                </ul>
+            </div>
+        </nav>
+    </header>
+    <section class="section">
+        {% block content %}
+        DEFAULT BASE CONTENT
+        {% endblock %}
+    </section>
+
+    {% block scripts %}
+    {% endblock %}
+</body>
+
+</html>
