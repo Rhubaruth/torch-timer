@@ -1,0 +1,15 @@
+{% extends 'core/base.html' %}
+
+{% block content %}
+
+<h1>Timer: {{ timer.title }}</h1>
+
+<p><strong>Created By:</strong> {{ timer.created_by.username }}</p>
+<p><strong>Effective Duration:</strong>
+        {{ timer.effective_duration }}
+</p>
+<p><strong>Display:</strong>
+        {{ parts_count }}
+</p>
+
+{% endblock %}

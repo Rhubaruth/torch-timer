@@ -5,4 +5,4 @@ from .models import Timer
 class TimerForm(ModelForm):
     class Meta:
         model = Timer
-        fields = ['init_duration']
+        fields = ['title', 'init_duration']

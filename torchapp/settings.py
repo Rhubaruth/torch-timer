@@ -30,6 +30,10 @@ DEBUG = True
 ALLOWED_HOSTS = []
 
 
+LOGIN_URL = 'login'  # redirect to log in page if not logged
+LOGIN_REDIRECT_URL = 'frontpage'
+LOGOUT_REDIRECT_URL = 'frontpage'
+
 # Application definition
 
 INSTALLED_APPS = [

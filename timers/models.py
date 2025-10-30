@@ -1,6 +1,7 @@
 from django.db import models
 from django.contrib.auth.models import User
-from datetime import datetime
+from datetime import timedelta
+from django.utils import timezone
 
 
 class TimerState(models.TextChoices):
@@ -17,13 +18,27 @@ class Timer(models.Model):
     )
     created_at = models.DateTimeField(auto_now_add=True)
 
-    init_duration = models.DateTimeField(blank=False, null=False)
-    effective_duration = models.DateTimeField(blank=False, null=False)
+    title = models.CharField(max_length=32, default='')
 
-    effective_end_time = models.DateTimeField(blank=False, null=False)
-    true_end_time = models.DateTimeField(null=True, default=None)
+    init_duration = models.DurationField(
+        blank=False,
+        null=False,
+        default=timedelta(hours=1),
+    )
+    effective_duration = models.DurationField(
+        blank=False,
+        null=False,
+        default=timedelta(hours=1),
+    )
 
-    status = models.IntegerField(
+    effective_end_time = models.DateTimeField(
+        blank=False,
+        null=False,
+        default=timezone.now() + timedelta(hours=1),
+    )
+
+    status = models.CharField(
+        max_length=12,
         choices=TimerState,
         default=TimerState.RUNNING
     )

@@ -14,13 +14,33 @@
 <body>
     <header> 
         <nav id="navbar">
+            <!-- Common section -->
             <div class="nav-container">
                 <a href="#home" class="logo-link">
                     <span class="logo-text">ShadowDark</span>
                 </a>
                 <ul class="nav-links">
-                    <li><a href="#home" class="nav-link active">Home</a></li>
-                    <li><a href="#collections" class="nav-link">Collections</a></li>
+                    <li><a href="{% url 'frontpage' %}" class="nav-link active">Home</a></li>
+                    <li><a href="{% url 'timers' %}" class="nav-link">Timers</a></li>
+
+                    <!-- User logout -->
+                    {% if request.user.is_authenticated %}
+                    <li>
+                        <form action="{% url 'logout' %}" method="post">
+                            {% csrf_token %}
+                            <button class="button is-danger" type="submit">Log out</a>
+                        </form>
+                    <!-- User login -->
+                    {% else %}
+                    </li>
+                        <a href="{% url 'signup' %}" class="button is-primary"><strong>Sing up</strong></a>
+                    <li>
+                    </li>
+                    <li>
+                        <a href="{% url 'login' %}" class="button is-light">Log in</a>
+                    </li>
+                    {% endif %}
+
                 </ul>
             </div>
         </nav>

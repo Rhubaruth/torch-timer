@@ -21,7 +21,7 @@ https://templatemo.com/tm-599-noir-fashion
 	--accent-hover: #ff1149;
 	--text-light: #ffffff;
 	--text-muted: #999;
-	--bg-dark: #111;
+	--bg-dark: #030103;
 	--bg-section: #0a0a0a;
 }
 
@@ -48,7 +48,6 @@ nav {
 	padding: 20px 50px;
 	z-index: 1000;
 	background: rgba(0, 0, 0, 0.95);
-	backdrop-filter: blur(10px);
 }
 
 nav.scrolled {
@@ -75,12 +74,6 @@ nav.scrolled {
 
 .logo-link:hover {
 	transform: scale(1.05);
-}
-
-.logo-svg {
-	width: 40px;
-	height: 40px;
-	margin-right: 10px;
 }
 
 .logo-text {
@@ -144,23 +137,3 @@ nav.scrolled {
 	height: 2px;
 	background: var(--accent);
 }
-
-.nav-cta {
-	background: var(--accent);
-	color: white !important;
-	padding: 10px 25px !important;
-	border-radius: 25px;
-	font-weight: 600;
-	opacity: 1 !important;
-}
-
-.nav-cta:hover {
-	background: var(--accent-hover);
-	transform: translateY(-2px);
-	box-shadow: 0 5px 15px rgba(255, 51, 102, 0.3);
-}
-
-.nav-cta::before {
-	display: none;
-}
-

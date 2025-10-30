@@ -1,0 +1,41 @@
+{% extends 'core/base.html' %}
+
+{% block content %}
+<div class="container">
+    <h2 class="title">Welcome to the <bold>Timers</bold></h2>
+
+    {% if request.user.is_authenticated %}
+        <a href="{% url 'timer_add' %}" class="button is-primary">Add timer</a>
+    {% endif %}
+</div>
+
+<div class="columns is-multiline">
+    {% for timer in timers %}
+    <div class="column is-3">
+            <div class="card-content">
+                <div class="media">
+                    <div class="media-content">
+                        <p class="title is-4">
+                        <strong>{{ timer.title }}</strong> {{ timer.created_by }}
+                        </p>
+                    </div>
+                </div>
+
+                <div class="content">
+                    {{ timer.effective_end_time }}
+                </div>
+            </div>
+
+            <footer class="card-footer">
+                <a href="{% url 'timer_detail' timer.id %}" class="card-footer-item">
+                    View
+                </a>
+            <!--     <a href="#edit" class="card-footer-item"> -->
+            <!--         Edit -->
+            <!--     </a> -->
+            </footer>
+    </div>
+    {% endfor %}
+</div>
+
+{% endblock %}
