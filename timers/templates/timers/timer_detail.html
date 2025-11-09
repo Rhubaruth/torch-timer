@@ -2,14 +2,65 @@
 
 {% block content %}
 
-<h1>Timer: {{ timer.title }}</h1>
+<div class="items-center">
+    <div class="card-content max-w-sm ">
+        <h1 class="text-xl">Timer: {{ timer.title }}</h1>
+        <p class="text-base">by <em>{{ timer.created_by.username }}<em></p>
 
-<p><strong>Created By:</strong> {{ timer.created_by.username }}</p>
-<p><strong>Effective Duration:</strong>
+        <progress id="timer-bar" value="30" max="30"></progress>
+        <div id="square-container" class="grid grid-cols-10 gap-1">
+
+        </div>
+        <p><strong>Status:</strong> {{ timer.status }}</p>
+        <!-- <p id='abstract_time'><strong>Display:</strong> -->
+        <!--     0 -->
+        <!-- </p> -->
+    </div>
+</div>
+
+{% if request.user.is_authenticated and request.user == timer.created_by %}
+<div>
+    <p><strong>Real Duration:</strong>
         {{ timer.effective_duration }}
-</p>
-<p><strong>Display:</strong>
-        {{ parts_count }}
-</p>
+    </p>
+    <p><strong>End time:</strong>
+        {{ timer.effective_end_time }}
+    </p>
+    <a href="{% url 'timer_edit' timer.id %}" class="card-footer-item">
+        Edit
+    </a>
+</div>
+{% endif %}
 
+{% endblock %}
+
+
+{% block scripts %}
+<script>
+    const container = document.getElementById('square-container');
+    const timerBar = document.getElementById('timer-bar');
+    var seconds_left = JSON.parse("{{seconds_left | escapejs }}");
+    console.log((seconds_left / 60).toFixed(3));
+
+    updateTimerBar();
+
+    function updateTimerBar() {
+        var timer_value = seconds_left / 60 / 2;
+
+        if (timer_value > timerBar.max) {
+            timerBar.value = timerBar.max;
+        } else if (timer_value <= 0) {
+            clearInterval(interval);
+        } else {
+            timerBar.value = timer_value;
+        }
+    }
+
+    function updateTime() {
+        seconds_left -= 30;
+        updateTimerBar();
+    }
+
+    const interval = setInterval(updateTime, 30 * 1000)
+</script>
 {% endblock %}

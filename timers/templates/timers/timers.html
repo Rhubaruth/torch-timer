@@ -16,13 +16,13 @@
                 <div class="media">
                     <div class="media-content">
                         <p class="title is-4">
-                        <strong>{{ timer.title }}</strong> {{ timer.created_by }}
+                        <strong>{{ timer.title }}</strong> [<em>{{ timer.status }}</em>]
                         </p>
                     </div>
                 </div>
 
                 <div class="content">
-                    {{ timer.effective_end_time }}
+                    Started: {{ timer.init_duration }}
                 </div>
             </div>
 
@@ -30,9 +30,11 @@
                 <a href="{% url 'timer_detail' timer.id %}" class="card-footer-item">
                     View
                 </a>
-            <!--     <a href="#edit" class="card-footer-item"> -->
-            <!--         Edit -->
-            <!--     </a> -->
+                {% if request.user.is_authenticated and request.user == timer.created_by %}
+                <a href="{% url 'timer_edit' timer.id %}" class="card-footer-item">
+                    Edit
+                </a>
+                {% endif %}
             </footer>
     </div>
     {% endfor %}

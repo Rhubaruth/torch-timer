@@ -9,17 +9,17 @@ https://templatemo.com/tm-599-noir-fashion
 @charset "utf-8";
 /* CSS Document */
 
-* {
-	margin: 0;
-	padding: 0;
-	box-sizing: border-box;
-}
+/* * { */
+/* 	margin: 0; */
+/* 	padding: 0; */
+/* 	box-sizing: border-box; */
+/* } */
 
 :root {
 	--primary: #0a0a0a;
 	--accent: #ff3366;
 	--accent-hover: #ff1149;
-	--text-light: #ffffff;
+	--text-light: #fefefe;
 	--text-muted: #999;
 	--bg-dark: #030103;
 	--bg-section: #0a0a0a;
@@ -60,15 +60,14 @@ nav.scrolled {
 	display: flex;
 	justify-content: space-between;
 	align-items: center;
-	max-width: 1400px;
-	margin: 0 auto;
+    width: 100%;
 	flex-wrap: wrap;
 	gap: 20px;
 }
 
 .logo-link {
 	display: flex;
-	align-items: center;
+	align-items: left;
 	text-decoration: none;
 }
 
@@ -79,14 +78,14 @@ nav.scrolled {
 .logo-text {
 	font-size: 28px;
 	font-weight: 900;
-    color: #ddd;
+    color: var(--text-light);
 }
 
 .nav-links {
 	display: flex;
 	gap: 30px;
 	list-style: none;
-	align-items: center;
+	align-items: right;
 }
 
 .nav-links a {
@@ -114,7 +113,7 @@ nav.scrolled {
 }
 
 .nav-links a:hover {
-	color: white;
+    color: var(--accent-hover);
 	opacity: 1;
 }
 
@@ -136,4 +135,47 @@ nav.scrolled {
 	width: 30px;
 	height: 2px;
 	background: var(--accent);
+}
+
+p {
+    margin-bottom: 8px;
+}
+
+
+button {
+  border: 1px solid #fdfdfd;
+  border-radius: 4px;
+  background-color: #030303;
+  padding: 5px;
+  color: var(--text-light);
+  transition: 0.2s;
+}
+
+button:hover {
+  background-color: #333333;
+}
+
+
+select {
+  border: 1px solid #fdfdfd;
+  border-radius: 4px;
+  background-color: var(--bg-dark);
+  padding: 5px;
+  color: var(--text-light);
+  transition: 0.2s;
+}
+
+input[type=text] {
+  border: 1px solid #bfbfbf;
+  border-radius: 4px;
+  background-color: var(--bg-dark);
+  padding: 6px;
+  color: var(--text-light);
+  outline: none; 
+  transition: 0.2s;
+}
+
+input[type=text]:focus {
+  border: 1px solid #fdfdfd;
+  background-color: #232323;
 }
