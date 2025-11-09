@@ -1,0 +1,21 @@
+{% extends 'core/base.html' %}
+
+{% block content %}
+<div class="container">
+    <h1 class="title">Edit timer - {{ timer.title }}</h1>
+
+    <form method="post" action=".">
+        {% csrf_token %}
+
+        {{ form.as_p }}
+        
+        <div class="field is-grouped">
+            <div class="control"> 
+                <button type="submit" class="button is-primary">Submit</button>
+                <button type="cancel" class="button is-danger">Cancel</button>
+            </div>
+        </div>
+    </form>
+
+</div>
+{% endblock %}
