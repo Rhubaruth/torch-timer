@@ -37,6 +37,8 @@ LOGOUT_REDIRECT_URL = 'frontpage'
 # Application definition
 
 INSTALLED_APPS = [
+    'daphne',
+    'chat',
     'django.contrib.admin',
     'django.contrib.auth',
     'django.contrib.contenttypes',
@@ -76,6 +78,15 @@ TEMPLATES = [
 ]
 
 WSGI_APPLICATION = 'torchapp.wsgi.application'
+ASGI_APPLICATION = 'torchapp.asgi.application'  # Daphne pointer to config
+CHANNEL_LAYERS = {
+    "default": {
+        "BACKEND": "channels_redis.core.RedisChannelLayer",
+        "CONFIG": {
+            "hosts": [("127.0.0.1", 6379)]
+        }
+    }
+}
 
 
 # Database
