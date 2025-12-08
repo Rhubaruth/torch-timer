@@ -42,3 +42,21 @@ class Timer(models.Model):
         choices=TimerState,
         default=TimerState.RUNNING
     )
+
+    def get_duration(self) -> int:
+        """ Returns remaining duration of the timer in seconds """
+        if self.status == TimerState.RUNNING:
+            return (self.effective_end_time - timezone.now()).total_seconds()
+        return self.effective_duration.total_seconds()
+
+    def terminate_if_finished(self) -> bool:
+        # Do nothing for timers with remaining duration
+        if self.get_duration() > 0:
+            return False
+
+        self.effective_duration = timedelta()
+        self.effective_end_time = timezone.now()
+        self.status = TimerState.FINISHED
+
+        self.save()
+        return True

@@ -26,11 +26,7 @@ def timer_detail(request, timer_id):
 
     print("IsOwner: ", request.user == timer.created_by)
 
-    duration = 0
-    if timer.status == TimerState.RUNNING:
-        duration = (timer.effective_end_time - timezone.now()).total_seconds()
-    elif timer.status == TimerState.PAUSED:
-        duration = timer.effective_duration.total_seconds()
+    duration = timer.get_duration()
 
     context = {
         'timer': timer,
