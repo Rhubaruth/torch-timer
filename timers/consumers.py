@@ -1,6 +1,11 @@
 import json
+from django.utils import timezone
+from datetime import timedelta
 
 from channels.generic.websocket import AsyncWebsocketConsumer
+from .models import Timer
+
+from channels.db import database_sync_to_async
 
 
 class TimerConsumer(AsyncWebsocketConsumer):
@@ -28,7 +33,7 @@ class TimerConsumer(AsyncWebsocketConsumer):
         text_data_json = json.loads(text_data)
         message = text_data_json["message"]
 
-        # TODO: Update DB entry?
+        await self._update_timer(self.timer_id, message)
 
         # Send message to room group
         await self.channel_layer.group_send(
@@ -42,3 +47,12 @@ class TimerConsumer(AsyncWebsocketConsumer):
 
         # Send to WebSocket
         await self.send(text_data=json.dumps({"time_delta": message}))
+
+    @database_sync_to_async
+    def _update_timer(self, timer_id: int, delta_duration: float):
+        print('Updating', timer_id)
+        # Update DB entry
+        timer: Timer = Timer.objects.get(pk=timer_id)
+        timer.effective_duration += timedelta(seconds=delta_duration)
+        timer.effective_end_time = timezone.now() + timer.effective_duration
+        timer.save()
