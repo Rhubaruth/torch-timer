@@ -41,4 +41,6 @@ urlpatterns = [
         views.LogoutView.as_view(),
         name='logout'
     ),
+
+    path('chat/', include("chat.urls"))
 ]
