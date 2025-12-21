@@ -43,7 +43,7 @@ class Timer(models.Model):
         default=TimerState.RUNNING
     )
 
-    def get_duration(self) -> int:
+    def get_duration(self) -> float:
         """ Returns remaining duration of the timer in seconds """
         if self.status == TimerState.RUNNING:
             return (self.effective_end_time - timezone.now()).total_seconds()

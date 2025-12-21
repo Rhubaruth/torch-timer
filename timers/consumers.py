@@ -33,7 +33,10 @@ class TimerConsumer(AsyncWebsocketConsumer):
         text_data_json = json.loads(text_data)
         message = text_data_json["message"]
 
-        await self._update_timer(self.timer_id, message)
+        await self._update_timer(
+            self.timer_id,
+            float(message)
+        )
 
         # Send message to room group
         await self.channel_layer.group_send(
@@ -49,10 +52,11 @@ class TimerConsumer(AsyncWebsocketConsumer):
         await self.send(text_data=json.dumps({"time_delta": message}))
 
     @database_sync_to_async
-    def _update_timer(self, timer_id: int, delta_duration: float):
+    def _update_timer(self, timer_id: int, delta_sec: float):
         print('Updating', timer_id)
         # Update DB entry
         timer: Timer = Timer.objects.get(pk=timer_id)
-        timer.effective_duration += timedelta(seconds=delta_duration)
+        updated_seconds = timer.get_duration() + delta_sec
+        timer.effective_duration = timedelta(seconds=int(updated_seconds))
         timer.effective_end_time = timezone.now() + timer.effective_duration
         timer.save()
