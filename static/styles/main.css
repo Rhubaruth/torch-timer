@@ -1,0 +1,89 @@
+/*
+
+TemplateMo 599 Noir Fashion
+
+https://templatemo.com/tm-599-noir-fashion
+
+*/
+
+@charset "utf-8";
+
+:root {
+	--primary: #9a8c98;
+    --secondary: #c9ada7;
+	--text-dark: #f5f5fa;
+	--text-muted: #f2e9e4;
+	--bg-dark: #22223b;
+	--bg-accent: #4a4e69;
+}
+
+html {
+	scroll-behavior: smooth;
+}
+
+section {
+    padding: 20px;
+}
+
+body {
+    font-family: 'JBlack', sans-serif;
+	background: var(--bg-dark);
+	color: var(--text-dark);
+	overflow-x: hidden;
+    font-size: 14px;
+    margin: 0;
+}
+
+
+/* Nav Bar */
+#navbar {
+    font-size: 22px;
+    position: sticky;
+    margin: 0;
+    margin-bottom: 0.25rem;
+    margin-top: 0.5rem;
+    padding: 0.7rem;
+    padding-top: 0.5rem;
+    display: flex;
+
+    border-bottom: 2px solid var(--secondary);
+}
+#nav-left {
+    /* width: fit-content; */
+    padding-left: 0.4rem;
+    padding-right: 0.2rem;
+    flex-shrink:0;
+    font-weight: 700;
+}
+#nav-mid { width: 100%; }
+#nav-right {
+    padding-right: 0.4rem;
+    display: flex;
+    justify-content: flex-end;
+    align-items: center;
+    width: fit-content;
+    gap: 1.5rem;
+    flex-shrink:0;
+    padding-right: 10px;
+}
+#nav-right * {
+    flex-shrink:0;
+    font-size: 16px;
+}
+
+#navbar * {
+    text-decoration: none;
+    color: var(--text-muted);
+    padding-bottom: 4px;
+}
+/* #navbar form { */
+/*     height: 100%; */
+/* } */
+
+#navbar .active {
+    font-weight: 700;
+    padding-bottom: 2px;
+    border-bottom: 2px solid var(--text-muted);
+}
+
+

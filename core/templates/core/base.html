@@ -6,47 +6,37 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Torch Timer</title>
-    <link rel="stylesheet" href="{% static 'styles/templatemo-noir-fashion.css' %}">
-    <link rel="stylesheet" href="{% static 'styles/timer_card.css' %}">
-
-    <script src="https://cdn.jsdelivr.net/npm/@tailwindcss/browser@4"></script>
+    <link rel="stylesheet" href="{% static 'styles/main.css' %}">
+    {% block styles %}
+    {% endblock %}
 </head>
 
 
 <body>
-    <header> 
-        <nav id="navbar">
-            <!-- Common section -->
-            <div class="nav-container">
-                <a href="#home" class="logo-link">
-                    <span class="logo-text">ShadowDark</span>
-                </a>
-                <ul class="nav-links">
-                    <li><a href="{% url 'frontpage' %}" class="nav-link active">Home</a></li>
-                    <li><a href="{% url 'timers' %}" class="nav-link">Timers</a></li>
+    <header id="navbar"> 
+        <div id="nav-left">
+            Shadowdark Utils
+        </div>
+        <div id="nav-mid">
+        </div>
+        <div id="nav-right">
+            <a href="{% url 'frontpage' %}" class="nav-link active">Home</a>
+            <a href="{% url 'timers' %}" class="nav-link">Timers</a>
+            <div>|</div>
 
-                    <!-- User logout -->
-                    {% if request.user.is_authenticated %}
-                    <li>
-                        <form action="{% url 'logout' %}" method="post">
-                            {% csrf_token %}
-                            <button class="button is-danger" type="submit">Log out</button>
-                        </form>
-                    </li>
-                    <!-- User login -->
-                    {% else %}
-                    </li>
-                        <a href="{% url 'signup' %}" class="button is-primary"><strong>Sing up</strong></a>
-                    <li>
-                    </li>
-                    <li>
-                        <a href="{% url 'login' %}" class="button is-light">Log in</a>
-                    </li>
-                    {% endif %}
-
-                </ul>
-            </div>
-        </nav>
+            <!-- User logout -->
+            {% if request.user.is_authenticated %}
+            <form action="{% url 'logout' %}" method="post">
+                {% csrf_token %}
+                <!-- <button class="button is-danger" type="submit">Log out</button> -->
+                <a href='#' class="nav-link" onclick='this.parentNode.submit(); return false;'>Log out</a>
+            </form>
+            <!-- User login -->
+            {% else %}
+            <a href="{% url 'signup' %}" class="button is-primary"><strong>Sing up</strong></a>
+            <a href="{% url 'login' %}" class="button is-light">Log in</a>
+            {% endif %}
+        </div>
     </header>
     <section class="section">
         {% block content %}
