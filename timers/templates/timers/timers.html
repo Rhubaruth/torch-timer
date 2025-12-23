@@ -1,41 +1,43 @@
 {% extends 'core/base.html' %}
+{% load static %}
+
+{% block styles %}
+    <link rel="stylesheet" href="{% static 'styles/timer_card.css' %}">
+{% endblock %}
 
 {% block content %}
-<div class="container">
-    <h2 class="title">Welcome to the <bold>Timers</bold></h2>
+<div>
+    <h2>Timers</h2>
 
     {% if request.user.is_authenticated %}
-        <a href="{% url 'timer_add' %}" class="button is-primary">Add timer</a>
+        <a href="{% url 'timer_add' %}" class="a-primary">Add timer</a>
     {% endif %}
 </div>
 
-<div class="columns is-multiline">
+<div class="timer-grid">
     {% for timer in timers %}
-    <div class="column is-3">
-            <div class="card-content">
-                <div class="media">
-                    <div class="media-content">
-                        <p class="title is-4">
-                        <strong>{{ timer.title }}</strong> [<em>{{ timer.status }}</em>]
-                        </p>
-                    </div>
-                </div>
-
-                <div class="content">
-                    Started: {{ timer.init_duration }}
-                </div>
+    <div class="container">
+            <div class="title">
+                <strong>{{ timer.title }}</strong> [<em>{{ timer.status }}</em>]
+            </div>
+            <div>
+                <strong>Author:</strong> {{ timer.created_by|capfirst }}
+            </div>
+            <div>
+                <strong>Left:</strong> {{ timer.get_duration_minutes|floatformat:0 }}
+                minute{{ timer.get_duration_minutes|floatformat:0|pluralize }}
             </div>
 
-            <footer class="card-footer">
-                <a href="{% url 'timer_detail' timer.id %}" class="card-footer-item">
+            <div class="footer">
+                <a href="{% url 'timer_detail' timer.id %}">
                     View
                 </a>
                 {% if request.user.is_authenticated and request.user == timer.created_by %}
-                <a href="{% url 'timer_edit' timer.id %}" class="card-footer-item">
+                <a href="{% url 'timer_edit' timer.id %}">
                     Edit
                 </a>
                 {% endif %}
-            </footer>
+            </div>
     </div>
     {% endfor %}
 </div>
