@@ -87,3 +87,7 @@ body {
 }
 
 
+a {
+    text-decoration: underline;
+    color: var(--text-muted);
+}

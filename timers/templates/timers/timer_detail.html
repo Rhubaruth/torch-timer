@@ -1,38 +1,46 @@
 {% extends 'core/base.html' %}
+{% load static %}
+
+{% block styles %}
+    <link rel="stylesheet" href="{% static 'styles/timer_card.css' %}">
+{% endblock %}
 
 {% block content %}
 
 {{ timer.id|json_script:"timer-id" }}
-<div class="items-center">
-    <div class="card-content max-w-sm ">
-        <h1 class="text-xl">Timer: {{ timer.title }}</h1>
-        <p class="text-base">by <em>{{ timer.created_by.username }}<em></p>
 
-        <progress id="timer-bar" value="30" max="30"></progress>
-        <p><strong>Status:</strong> {{ timer.status }}</p>
+<div class="timer-part">
+    <!-- First Timer -->
+    <div class="container">
+        <div class="title">
+            <strong>Timer:</strong> {{ timer.title|capfirst }}
+        </div>
+        <div>
+            <strong>Author:</strong> {{ timer.created_by|capfirst }}
+        </div>
+        <div>
+            <progress id="timer-bar" value="30" max="30"></progress>
+            <div><strong>Status:</strong> {{ timer.status }}</div>
+            {% if request.user.is_authenticated and request.user == timer.created_by %}
+                <div><strong>Real Duration:</strong>
+                    {{ timer.effective_duration }}
+                </div>
+            {% endif %}
+        </div>
 
         {% if request.user.is_authenticated and request.user == timer.created_by %}
-        <div>
-            <p><strong>Real Duration:</strong>
-                {{ timer.effective_duration }}
-            </p>
-            <a href="{% url 'timer_edit' timer.id %}" class="card-footer-item">
+        <div class="footer">
+            <!-- Buttons Row -->
+            <button id='time-add' class="timer-button">+10 mins</button>
+            <button id='time-subtract' class="timer-button">-10 mins</button>
+            <button class="timer-button" onclick="location.href='{% url 'timer_edit' timer.id %}'">
                 Edit
-            </a>
+            </button>
         </div>
         {% endif %}
     </div>
 
-    {% if request.user.is_authenticated and request.user == timer.created_by %}
-    <div>
-        <!-- Buttons Row -->
-        <div class="flex flex-row space-x-4 mt-4">
-            <button id='time-add' class="px-4 py-2 bg-blue-600 text-white rounded hover:bg-blue-700">+ 10 mins</button>
-            <button id='time-subtract' class="px-4 py-2 bg-gray-600 text-white rounded hover:bg-gray-700">- 10 mins</button>
-        </div>
-    </div>
-    {% endif %}
-
+    <!-- Second timer -->
 </div>
 
 
@@ -90,6 +98,7 @@
         console.error('Chat socket closed unexpectedly');
     };
 
+    {% if request.user.is_authenticated and request.user == timer.created_by %}
     document.querySelector('#time-add').onclick = function(e) {
         chatSocket.send(JSON.stringify({
             'message': 60*10.0
@@ -100,5 +109,6 @@
             'message': 60*(-10.0)
         }));
     };
+    {% endif %}
 </script>
 {% endblock %}
