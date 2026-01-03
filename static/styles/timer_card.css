@@ -13,14 +13,14 @@ strong {
     margin-bottom: 5px;
     width: 100%;
 
-    background-color: inherit;
+    /* background-color: inherit; */
+    background-color: var(--bg-dark);
     border: none;
     border-radius: 7px;
 }
 
 .timer-part progress::-moz-progress-bar {
     background-color: var(--secondary);
-    border: 1px solid var(--secondary);
     border-radius: 4px;
 }
 

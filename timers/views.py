@@ -2,6 +2,7 @@ from django.shortcuts import render, redirect
 from django.contrib.auth.decorators import login_required
 from django.utils import timezone
 
+from datetime import timedelta
 import json
 
 from .forms import TimerForm
@@ -18,7 +19,6 @@ def index(request):
     return render(request, 'timers/timers.html', context)
 
 
-# @login_required
 def timer_detail(request, timer_id):
     """ Display detail of a timer. """
     timer: Timer = Timer.objects.get(pk=timer_id)
@@ -27,10 +27,14 @@ def timer_detail(request, timer_id):
     print("IsOwner: ", request.user == timer.created_by)
 
     duration = timer.get_duration()
+    if timer.status == TimerState.RUNNING:
+        timer.effective_duration = timedelta(seconds=round(duration))
+        timer.save()
 
     context = {
         'timer': timer,
-        'seconds_left': json.dumps(duration)
+        'seconds_left': json.dumps(duration),
+        'is_running': timer.status == TimerState.RUNNING
     }
 
     return render(request, 'timers/timer_detail.html', context)

@@ -53,6 +53,7 @@
     const container = document.getElementById('square-container');
     const timerBar = document.getElementById('timer-bar');
     var seconds_left = JSON.parse("{{seconds_left | escapejs }}");
+    var is_running = is_running;
     console.log((seconds_left / 60).toFixed(3));
 
     function updateTimerBar() {
@@ -61,7 +62,9 @@
         if (timer_value > timerBar.max) {
             timerBar.value = timerBar.max;
         } else if (timer_value <= 0) {
-            clearInterval(interval);
+            if (is_running) {
+                clearInterval(interval);
+            }
             timerBar.value = 0;
         } else {
             timerBar.value = timer_value;
@@ -73,7 +76,9 @@
         updateTimerBar();
     }
 
-    const interval = setInterval(updateTime, 30 * 1000)
+    if (is_running) {
+        const interval = setInterval(updateTime, 30 * 1000)
+    }
     updateTimerBar();
 
 

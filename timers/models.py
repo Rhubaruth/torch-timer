@@ -48,7 +48,7 @@ class Timer(models.Model):
         if self.status == TimerState.RUNNING:
             return (self.effective_end_time - timezone.now()).total_seconds()
         return self.effective_duration.total_seconds()
-    
+
     def get_duration_minutes(self) -> float:
         duration = self.get_duration()
         if duration < 0:
