@@ -91,3 +91,49 @@ a {
     text-decoration: underline;
     color: var(--text-muted);
 }
+
+input {
+    background-color: inherit;
+    border: 1px solid var(--text-muted);
+    border-radius: 4px;
+    color: var(--text-dark);
+    padding: 4px;
+    margin-top: 2px;
+    margin-bottom: 2px;
+}
+
+input:focus {
+    border: 2px solid var(--secondary);
+    outline: none;
+    margin-top: 1px;
+    margin-bottom: 1px;
+}
+
+select {
+    background-color: inherit;
+    border: 1px solid var(--text-muted);
+    border-radius: 4px;
+    color: var(--text-dark);
+    padding: 4px;
+}
+
+button {
+    color: var(--bg-dark);
+    border-radius: 4px;
+    padding: 0.5em;
+    background-color: var(--secondary);
+    border: 1px solid var(--secondary);
+
+    transition: border 0.5s;
+    transition: transform 0.2s;
+}
+
+button:hover {
+    background-color: var(--text-muted);
+    border: 1px solid var(--text-muted);
+}
+
+button:active {
+    transform: translateY(2px);
+}
+
