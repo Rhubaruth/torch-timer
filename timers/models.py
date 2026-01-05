@@ -3,6 +3,8 @@ from django.contrib.auth.models import User
 from datetime import timedelta
 from django.utils import timezone
 
+from math import floor
+
 
 class TimerState(models.TextChoices):
     FINISHED = "Finished"
@@ -49,10 +51,12 @@ class Timer(models.Model):
             return (self.effective_end_time - timezone.now()).total_seconds()
         return self.effective_duration.total_seconds()
 
-    def get_duration_minutes(self) -> float:
+    def get_duration_minutes(self, approx: bool = True) -> float:
         duration = self.get_duration()
         if duration < 0:
             return 0
+        if approx:
+            return floor(duration / (60 * 5)) * 5
         return duration / 60.0
 
     def terminate_if_finished(self) -> bool:
