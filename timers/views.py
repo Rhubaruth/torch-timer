@@ -27,7 +27,7 @@ def timer_detail(request, timer_id):
     print("IsOwner: ", request.user == timer.created_by)
 
     duration = timer.get_duration()
-    if timer.status == TimerState.RUNNING:
+    if timer.status == TimerState.RUNNING and timer.get_duration() > 0:
         timer.effective_duration = timedelta(seconds=round(duration))
         timer.save()
 

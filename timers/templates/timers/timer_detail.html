@@ -8,6 +8,7 @@
 {% block content %}
 
 {{ timer.id|json_script:"timer-id" }}
+{{ is_running|json_script:"is-running" }}
 
 <div class="timer-part">
     <!-- First Timer -->
@@ -22,7 +23,7 @@
             <progress id="timer-bar" value="30" max="30"></progress>
             <div><strong>Status:</strong> {{ timer.status }}</div>
             {% if request.user.is_authenticated and request.user == timer.created_by %}
-                <div><strong>Real Duration:</strong>
+                <div id="real-duration"><strong>Real Duration:</strong>
                     {{ timer.effective_duration }}
                 </div>
             {% endif %}
@@ -50,35 +51,55 @@
 {% block scripts %}
 <script>
     // Update timer locally
+    const period = 10
     const container = document.getElementById('square-container');
     const timerBar = document.getElementById('timer-bar');
     var seconds_left = JSON.parse("{{seconds_left | escapejs }}");
-    var is_running = is_running;
+    const is_running = JSON.parse(document.getElementById('is-running').textContent);
     console.log((seconds_left / 60).toFixed(3));
+
+    var real_dur_div = null;
+    {% if request.user.is_authenticated and request.user == timer.created_by %}
+    var real_dur_div = document.getElementById('real-duration')
+
+    function updateRealDuration() {
+        real_dur_div.text = "Real Duration:" + seconds_left
+    }
+    updateRealDuration()
+    {% endif %}
+
+    var interval = null;
+    if (is_running == true) {
+        interval = setInterval(updateTime, period * 1000)
+    }
 
     function updateTimerBar() {
         var timer_value = seconds_left / 60 / 2;
+        console.log("Timer Value", timer_value);
 
         if (timer_value > timerBar.max) {
             timerBar.value = timerBar.max;
         } else if (timer_value <= 0) {
-            if (is_running) {
-                clearInterval(interval);
-            }
             timerBar.value = 0;
         } else {
             timerBar.value = timer_value;
         }
     }
 
+
     function updateTime() {
-        seconds_left -= 30;
+        seconds_left -= period;
         updateTimerBar();
+        if (real_dur_div != null) {
+            updateRealDuration()
+        }
+        if (seconds_left < 0 && interval) {
+            // TODO: Sound Alert
+            clearInterval(interval);
+            return;
+        }
     }
 
-    if (is_running) {
-        const interval = setInterval(updateTime, 30 * 1000)
-    }
     updateTimerBar();
 
 
