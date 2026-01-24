@@ -95,3 +95,13 @@ strong {
     font-size: 16px;
     color: var(--text-muted);
 }
+
+th {
+    color: var(--text-muted);
+    text-align: left;
+    padding-right: 10px;
+}
+td {
+    text-align: right;
+}
+
