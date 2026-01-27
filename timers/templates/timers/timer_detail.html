@@ -13,28 +13,33 @@
 <div class="timer-part">
     <!-- First Timer -->
     <div class="container">
-        <div class="title">
-            <strong>Timer:</strong> {{ timer.title|capfirst }}
-        </div>
         <div>
-            <strong>Author:</strong> {{ timer.created_by|capfirst }}
-        </div>
-        <div>
-            <progress id="timer-bar" value="30" max="30"></progress>
-            <div>
-                <table>
-                    <tr>
-                        <th>Status:</th>
-                        <td>{{ timer.status }}</td>
-                    <tr>
-                    {% if request.user.is_authenticated and request.user == timer.created_by %}
-                    <tr>
-                        <th>Duration:</th>
-                        <td id="real-duration">{{ timer.effective_duration }}</td>
-                    <tr>
-                    {% endif %}
-                </table>
-            </div>
+            <table>
+                <tr class="title">
+                    <th>Timer:</th>
+                    <td>{{ timer.title|capfirst }}</td>
+                <tr>
+                <tr>
+                    <th>Author:</th>
+                    <td>{{ timer.created_by|capfirst }}</td>
+                <tr>
+                <tr>
+                    <th>Status:</th>
+                    <td>{{ timer.status }}</td>
+                <tr>
+                {% if request.user.is_authenticated and request.user == timer.created_by %}
+                <tr>
+                    <th>Duration:</th>
+                    <td id="real-duration">{{ timer.effective_duration }}</td>
+                </tr>
+                {% endif %}
+
+                <tr>
+                    <td colspan="2">
+                    <progress id="timer-bar" value="30" max="30"></progress>
+                    </td>
+                </tr>
+            </table>
         </div>
 
         {% if request.user.is_authenticated and request.user == timer.created_by %}
@@ -58,8 +63,16 @@
 
 {% block scripts %}
 <script>
+    // Notifications & Audio
+    let promise = Notification.requestPermission();
+
+    function playSound() {
+        var audio = new Audio('/static/sounds/new-notification-09.mp3');
+        audio.play();
+    }
+
     // Update timer locally
-    var period = 10
+    var period = 5
     const container = document.getElementById('square-container');
     const timerBar = document.getElementById('timer-bar');
     var seconds_left = JSON.parse("{{seconds_left | escapejs }}");
@@ -114,6 +127,7 @@
         if (seconds_left <= 0 && interval) {
             // TODO: Sound Alert
             clearInterval(interval);
+            playSound();
             alert('Timer ' + timerId + ' timeout!')
             console.log('Timer ' + timerId + ' timeout!')
             return;
