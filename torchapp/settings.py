@@ -37,6 +37,7 @@ LOGOUT_REDIRECT_URL = 'frontpage'
 # Application definition
 
 INSTALLED_APPS = [
+    'channels_redis',
     'daphne',
     'chat',
     'django.contrib.admin',
