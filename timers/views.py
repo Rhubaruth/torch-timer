@@ -44,7 +44,7 @@ def timer_detail(request, timer_id):
 def timer_add(request):
     canAdd = ''
 
-    if request.method == 'POST':
+    if request.method == 'POST' and "cancel" not in request.POST:
         form = TimerForm(request.POST)
 
         if form.is_valid():
@@ -70,7 +70,7 @@ def timer_add(request):
 def timer_edit(request, timer_id):
     timer: Timer = Timer.objects.filter(
         created_by=request.user).get(pk=timer_id)
-    if request.method == 'POST':
+    if request.method == 'POST' and "cancel" not in request.POST:
         form = TimerForm(request.POST, instance=timer)
 
         if form.is_valid():
@@ -83,6 +83,7 @@ def timer_edit(request, timer_id):
     else:
         form = TimerForm(instance=timer)
 
+    timer.effective_duration = timer.get_duration()
     context = {
         'form': form,
         'timer': timer

@@ -125,7 +125,6 @@
         updateTimerBar();
         updateRealDuration()
         if (seconds_left <= 0 && interval) {
-            // TODO: Sound Alert
             clearInterval(interval);
             playSound();
             alert('Timer ' + timerId + ' timeout!')
