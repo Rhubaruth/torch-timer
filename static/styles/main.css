@@ -8,6 +8,14 @@ https://templatemo.com/tm-599-noir-fashion
 
 @charset "utf-8";
 
+/* :root { */
+/* 	--primary: #9a8c98; */
+/*     --secondary: #a6a6bf; */
+/* 	--text-dark: #e6e6ec; */
+/* 	--text-muted: #c1c1d2; */
+/* 	--bg-dark: #1a1a24; */
+/* 	--bg-accent: #0e0e12; */
+/* } */
 :root {
 	--primary: #9a8c98;
     --secondary: #c9ada7;
