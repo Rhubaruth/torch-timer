@@ -13,39 +13,44 @@
 
 
 <body>
-    <header id="navbar"> 
-        <div id="nav-left">
-            Shadowdark Utils
-        </div>
-        <div id="nav-mid">
-        </div>
-        <div id="nav-right">
-            <a href="{% url 'frontpage' %}" class="nav-link active">Home</a>
-            <a href="{% url 'timers' %}" class="nav-link">Timers</a>
-            <div>|</div>
+<div class="App container">
+    <header>
+        <h1 class="mainHeader border-bottom">Rhubarut's Utils</h1>
+    </header>
 
+    <ul class="nav border-bottom">
+        <li class="nav-item">
+            <a href="{% url 'frontpage' %}" class="nav-link nav-active">Home</a>
+        </li>
+        <li class="nav-item">
+            <a href="{% url 'timers' %}" class="nav-link">Timers</a>
+        </li>
+        <li class="nav-item">
+            <a href="#" class="nav-link">Initiative</a>
+        </li>
+        <li class="nav-item">
             <!-- User logout -->
             {% if request.user.is_authenticated %}
             <form action="{% url 'logout' %}" method="post">
                 {% csrf_token %}
-                <!-- <button class="button is-danger" type="submit">Log out</button> -->
                 <a href='#' class="nav-link" onclick='this.parentNode.submit(); return false;'>Log out</a>
             </form>
             <!-- User login -->
             {% else %}
-            <a href="{% url 'signup' %}" class="button is-primary"><strong>Sing up</strong></a>
-            <a href="{% url 'login' %}" class="button is-light">Log in</a>
+            <a href="{% url 'login' %}" class="nav-link">Log in</a>
             {% endif %}
-        </div>
-    </header>
-    <section class="section">
-        {% block content %}
-        DEFAULT BASE CONTENT
-        {% endblock %}
-    </section>
+        </li>
+    </ul>
+
+
+
+    {% block content %}
+    DEFAULT BASE CONTENT
+    {% endblock %}
 
     {% block scripts %}
     {% endblock %}
+</div>
 </body>
 
 </html>
