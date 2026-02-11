@@ -18,15 +18,25 @@
         <h1 class="mainHeader border-bottom">Rhubarut's Utils</h1>
     </header>
 
+    {% with this_url=request.path %}
     <ul class="nav border-bottom">
+        <!-- <li class="nav-item"> -->
+        <!--     {{ this_url }} -->
+        <!-- </li> -->
         <li class="nav-item">
-            <a href="{% url 'frontpage' %}" class="nav-link nav-active">Home</a>
+            <a href="{% url 'frontpage' %}" class="nav-link {% if '/' == this_url %}nav-active {% endif %}">
+                Home
+            </a>
         </li>
         <li class="nav-item">
-            <a href="{% url 'timers' %}" class="nav-link">Timers</a>
+            <a href="{% url 'timers' %}" class="nav-link {% if '/timers/' in this_url %} nav-active {% endif %}">
+                Timers
+            </a>
         </li>
         <li class="nav-item">
-            <a href="#" class="nav-link">Initiative</a>
+            <a href="{% url 'timers' %}" class="nav-link {% if '/initiative/' in this_url %} nav-active {% endif %}">
+                Initiative
+            </a>
         </li>
         <li class="nav-item">
             <!-- User logout -->
@@ -41,7 +51,7 @@
             {% endif %}
         </li>
     </ul>
-
+    {% endwith %}
 
 
     {% block content %}

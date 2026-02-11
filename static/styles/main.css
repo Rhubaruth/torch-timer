@@ -103,7 +103,7 @@ div {
     --btn-bg-color: #fff;
     --btn-bg-hover: #eee;
     --btn-border-color: #212529;
-    --btn-border-hover: #424649
+    --btn-border-hover: #424649;
 
     border-radius: var(--bs-border-radius);
 
@@ -129,6 +129,28 @@ div {
     border: var(--bs-border-width) var(--bs-border-style) var(--btn-border-color);
 }
 
+input {
+    --input-border-color: #424649;
+
+    background-color: inherit;
+    border: 1px solid var(--input-border-color);
+    border-radius: 4px;
+    color: black;
+    padding: 4px;
+}
+input:focus {
+    outline: 1px solid var(--input-border-color);
+}
+
+select {
+    --input-border-color: #424649;
+
+    background-color: inherit;
+    border: 1px solid var(--input-border-color);
+    border-radius: 4px;
+    color: black;
+    padding: 4px;
+}
 
 :root {
     --bs-blue:#0d6efd;

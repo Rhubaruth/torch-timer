@@ -10,9 +10,9 @@
         {{ form.as_p }}
         
         <div class="">
-            <button type="submit" class="button is-primary">Submit</button>
+            <button type="submit" class="btn btn-dark btn-outline">Submit</button>
             <!-- <button type="cancel" class="button is-danger">Cancel</button> -->
-            <a class="button" href="{{request.META.HTTP_REFERER|escape}}">Back</a>
+            <a class="btn btn-outline" href="{{request.META.HTTP_REFERER|escape}}">Back</a>
         </div>
     </form>
 
