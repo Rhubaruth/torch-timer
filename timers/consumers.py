@@ -32,7 +32,11 @@ class TimerConsumer(AsyncWebsocketConsumer):
     async def receive(self, text_data):
         text_data_json = json.loads(text_data)
         message = text_data_json["message"]
+        print('recieve ', text_data_json)
 
+        # TODO: check message is from authenticated user
+
+        # Update DB record of the timer
         await self._update_timer(
             self.timer_id,
             float(message)
