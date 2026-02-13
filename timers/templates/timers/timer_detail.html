@@ -7,12 +7,6 @@
 
 {% block content %}
 
-{{ timer.id|json_script:"timer-id" }}
-
-<div>
-    {{ timer.status }} 
-    {{ timer_active }} 
-</div>
 
 <div class="timer-part">
     <!-- First Timer -->
@@ -22,19 +16,21 @@
                 <tr class="title">
                     <th>Timer:</th>
                     <td>{{ timer.title|capfirst }}</td>
-                <tr>
+                </tr>
                 <tr>
                     <th>Author:</th>
                     <td>{{ timer.created_by|capfirst }}</td>
-                <tr>
+                </tr>
                 <tr>
                     <th>Status:</th>
                     <td>{{ timer.status }}</td>
-                <tr>
+                </tr>
+                {% if request.user.is_authenticated and request.user == timer.created_by %}
                 <tr>
                     <th>Duration:</th>
                     <td id="real-duration">{{ timer.effective_duration }}</td>
                 </tr>
+                {% endif %}
 
                 <tr>
                     <td colspan="2">
@@ -47,18 +43,18 @@
         {% if request.user.is_authenticated and request.user == timer.created_by %}
         <div class="timer-footer">
             <!-- Buttons Row -->
-            
-            <button id='time-pause' class="btn btn-outline" {% if timer.status == "Paused" %}hidden{% endif %} {% if not timer_active %}disabled=""{% endif %}>
+            <!-- TODO: Disable buttons for finished/deletion queued timers-->
+            <button id='time-pause' class="btn btn-outline" {% if timer.status == "Paused" %}hidden{% endif %}>
                 Pause
             </button>
-            <button id='time-start' class="btn btn-dark btn-outline" {% if timer.status == "Running" %}hidden{% endif %} {% if not timer_active %}disabled=""{% endif %}>
+            <button id='time-start' class="btn btn-dark btn-outline" {% if timer.status == "Running" %}hidden{% endif %}>
                 Start
             </button>
 
-            <button id='time-add' class="btn btn-outline" {% if not timer_active %}disabled=""{% endif %}>
+            <button id='time-add' class="btn btn-outline">
                 +5 mins
             </button>
-            <button id='time-subtract' class="btn btn-outline" {% if not timer_active %}disabled=""{% endif %}>
+            <button id='time-subtract' class="btn btn-outline">
                 -5 mins
             </button>
             <button class="btn btn-outline" onclick="location.href='{% url 'timer_edit' timer.id %}'">
@@ -67,8 +63,6 @@
         </div>
         {% endif %}
     </div>
-
-    <!-- Second timer -->
 </div>
 
 
@@ -76,12 +70,18 @@
 
 
 {% block scripts %}
+
+
+{{ timer.id|json_script:"timer-id" }}
+{{ timer.status|json_script:"timer-status" }}
+{{ seconds_left|json_script:"seconds-left" }}
+
 <script>
     // Notifications & Audio
     let promise = Notification.requestPermission();
 
     function playSound() {
-        var audio = new Audio('/static/sounds/new-notification-09.mp3');
+        let audio = new Audio('/static/sounds/new-notification-09.mp3');
         audio.play();
     }
 
@@ -89,14 +89,15 @@
     var period = 2
     const container = document.getElementById('square-container');
     const timerBar = document.getElementById('timer-bar');
-    var seconds_left = JSON.parse("{{seconds_left | escapejs }}");
-    var is_running = ("{{timer.status | escapejs }}" == "Running");
+    var seconds_left = JSON.parse(document.getElementById('seconds-left').textContent);
+    var is_running = JSON.parse(document.getElementById('timer-status').textContent) == "Running";
     console.log((seconds_left / 60).toFixed(3));
 
     var real_dur_div = null;
 
     var button_start = null;
     var button_pause = null;
+
     function updateRealDuration() {
         if (real_dur_div == null) {
             return null;
@@ -108,13 +109,13 @@
         return real_dur_div.innerText;
     }
 
-    var real_dur_div = document.getElementById('real-duration');
     {% if request.user.is_authenticated and request.user == timer.created_by %}
-    var period = 1
+    real_dur_div = document.getElementById('real-duration');
+    period = 1
     updateRealDuration();
 
-    var button_start = document.querySelector('#time-start');
-    var button_pause = document.querySelector('#time-pause');
+    button_start = document.querySelector('#time-start');
+    button_pause = document.querySelector('#time-pause');
     {% endif %}
 
     var interval = null;
@@ -123,7 +124,8 @@
     }
 
     function updateTimerBar() {
-        var timer_value = (seconds_left / 3600) * timerBar.max;
+        let timer_value = (seconds_left / 3600) * timerBar.max;
+        console.log("Timer Value", timer_value);
 
         if (timer_value > timerBar.max) {
             timerBar.value = timerBar.max;
@@ -132,7 +134,6 @@
             seconds_left = 0;
         } else {
             timerBar.value = Math.floor(timer_value);
-            console.log("Timer Value", timer_value);
         }
     }
 
@@ -167,7 +168,7 @@
     );
 
     function update_time(time_delta) {
-        seconds_left += parseFloat(time_delta);
+        seconds_left += Number(time_delta);
         updateTimerBar();
         updateRealDuration();
     };
