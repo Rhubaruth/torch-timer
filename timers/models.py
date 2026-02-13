@@ -7,9 +7,10 @@ from math import floor
 
 
 class TimerState(models.TextChoices):
-    FINISHED = "Finished"
     RUNNING = "Running"
     PAUSED = "Paused"
+    FINISHED = "Finished"
+    DELETION = "Deletion"
 
 
 # Create your models here.
@@ -42,6 +43,10 @@ class Timer(models.Model):
     status = models.CharField(
         max_length=12,
         choices=TimerState,
+        # choices=[
+        #     ("Running", TimerState.RUNNING),
+        #     ("Paused", TimerState.PAUSED),
+        # ],
         default=TimerState.RUNNING
     )
 
@@ -49,6 +54,8 @@ class Timer(models.Model):
         """ Returns remaining duration of the timer in seconds """
         if self.status == TimerState.RUNNING:
             return (self.effective_end_time - timezone.now()).total_seconds()
+        if self.status == TimerState.FINISHED:
+            return 0.0
         return self.effective_duration.total_seconds()
 
     def get_duration_minutes(self, approx: bool = True) -> float:

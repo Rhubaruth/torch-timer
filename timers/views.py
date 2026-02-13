@@ -10,8 +10,8 @@ from .models import Timer, TimerState
 
 
 def index(request):
-    """ Display all timers that have been not finished. """
-    timers = Timer.objects.exclude(status=TimerState.FINISHED)
+    """ Display all timers that have been not queued for deletion. """
+    timers = Timer.objects.exclude(status=TimerState.DELETION)
 
     context = {
         'timers': timers
@@ -34,7 +34,8 @@ def timer_detail(request, timer_id):
     context = {
         'timer': timer,
         'seconds_left': json.dumps(duration),
-        'is_running': timer.status == TimerState.RUNNING
+        'timer_active': (timer.status == TimerState.RUNNING
+                         or timer.status == TimerState.PAUSED),
     }
 
     return render(request, 'timers/timer_detail.html', context)
