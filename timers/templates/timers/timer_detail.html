@@ -31,12 +31,10 @@
                     <th>Status:</th>
                     <td>{{ timer.status }}</td>
                 <tr>
-                {% if request.user.is_authenticated and request.user == timer.created_by %}
                 <tr>
                     <th>Duration:</th>
                     <td id="real-duration">{{ timer.effective_duration }}</td>
                 </tr>
-                {% endif %}
 
                 <tr>
                     <td colspan="2">
@@ -49,10 +47,18 @@
         {% if request.user.is_authenticated and request.user == timer.created_by %}
         <div class="timer-footer">
             <!-- Buttons Row -->
-            <button id='time-add' class="btn btn-outline" {% if not timer_active %} disabled="" {% endif %}>
+            
+            <button id='time-pause' class="btn btn-outline" {% if timer.status == "Paused" %}hidden{% endif %} {% if not timer_active %}disabled=""{% endif %}>
+                Pause
+            </button>
+            <button id='time-start' class="btn btn-dark btn-outline" {% if timer.status == "Running" %}hidden{% endif %} {% if not timer_active %}disabled=""{% endif %}>
+                Start
+            </button>
+
+            <button id='time-add' class="btn btn-outline" {% if not timer_active %}disabled=""{% endif %}>
                 +5 mins
             </button>
-            <button id='time-subtract' class="btn btn-outline" {% if not timer_active %} disabled="" {% endif %}>
+            <button id='time-subtract' class="btn btn-outline" {% if not timer_active %}disabled=""{% endif %}>
                 -5 mins
             </button>
             <button class="btn btn-outline" onclick="location.href='{% url 'timer_edit' timer.id %}'">
@@ -80,7 +86,7 @@
     }
 
     // Update timer locally
-    var period = 5
+    var period = 2
     const container = document.getElementById('square-container');
     const timerBar = document.getElementById('timer-bar');
     var seconds_left = JSON.parse("{{seconds_left | escapejs }}");
@@ -89,6 +95,8 @@
 
     var real_dur_div = null;
 
+    var button_start = null;
+    var button_pause = null;
     function updateRealDuration() {
         if (real_dur_div == null) {
             return null;
@@ -100,10 +108,13 @@
         return real_dur_div.innerText;
     }
 
+    var real_dur_div = document.getElementById('real-duration');
     {% if request.user.is_authenticated and request.user == timer.created_by %}
     var period = 1
-    var real_dur_div = document.getElementById('real-duration');
     updateRealDuration();
+
+    var button_start = document.querySelector('#time-start');
+    var button_pause = document.querySelector('#time-pause');
     {% endif %}
 
     var interval = null;
@@ -155,11 +166,44 @@
         + '/'
     );
 
-    chatSocket.onmessage = function(e) {
-        const data = JSON.parse(e.data);
-        seconds_left += data.time_delta;
+    function update_time(time_delta) {
+        seconds_left += parseFloat(time_delta);
         updateTimerBar();
         updateRealDuration();
+    };
+    function update_state(new_state) {
+        if(new_state == "Running") {
+            interval = setInterval(updateTime, period * 1000)
+            if(button_start) {
+            button_start.hidden = true
+            button_pause.hidden = false
+            }
+            return
+        }
+        if(interval) {
+            clearInterval(interval);
+        }
+        if(button_start) {
+            button_start.hidden = false
+            button_pause.hidden = true
+        }
+    };
+
+    chatSocket.onmessage = function(e) {
+        const data = JSON.parse(e.data);
+        console.log(data.type)
+        if("time_sync" in data){
+            seconds_left = data.time_sync
+            updateTimerBar();
+            updateRealDuration();
+        }
+
+        if(data.type == "update.time") {
+            update_time(data.time_delta)
+        }
+        else if(data.type == "update.state") {
+            update_state(data.new_state)
+        }
     };
 
     chatSocket.onclose = function(e) {
@@ -167,14 +211,28 @@
     };
 
     {% if request.user.is_authenticated and request.user == timer.created_by %}
+    // Add-Remove
     document.querySelector('#time-add').onclick = function(e) {
         chatSocket.send(JSON.stringify({
-            'message': 60*5.0,
+            "time_delta": 60*5.0,
         }));
     };
     document.querySelector('#time-subtract').onclick = function(e) {
         chatSocket.send(JSON.stringify({
-            'message': 60*(-5.0),
+            "time_delta": 60*(-5.0),
+        }));
+    };
+
+    // Pause-Play
+    document.querySelector('#time-pause').onclick = function(e) {
+        console.log('Pausing at ' + seconds_left)
+        chatSocket.send(JSON.stringify({
+            "new_state": "Paused"
+        }));
+    };
+    document.querySelector('#time-start').onclick = function(e) {
+        chatSocket.send(JSON.stringify({
+            "new_state": "Running"
         }));
     };
     {% endif %}
