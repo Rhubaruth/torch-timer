@@ -53,10 +53,12 @@ class Timer(models.Model):
     def get_duration(self) -> float:
         """ Returns remaining duration of the timer in seconds """
         if self.status == TimerState.RUNNING:
-            return (self.effective_end_time - timezone.now()).total_seconds()
+            return round(
+                    (self.effective_end_time - timezone.now()).total_seconds()
+            )
         if self.status == TimerState.FINISHED:
             return 0.0
-        return self.effective_duration.total_seconds()
+        return round(self.effective_duration.total_seconds())
 
     def get_duration_minutes(self, approx: bool = True) -> float:
         duration = self.get_duration()

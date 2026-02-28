@@ -31,8 +31,12 @@ class TimerConsumer(AsyncWebsocketConsumer):
     # Recieve message from WebSocket
     async def receive(self, text_data):
         text_data_json = json.loads(text_data)
+        print("User Token: ", text_data_json["user_token"])
 
-        # TODO: check message is from authenticated user
+        # simple authentication
+        if not self.scope["user"].is_authenticated:
+            # await self.close(code=4003)  # AUTHENTICATION_REQUIRED
+            return
 
         # Send message to room group
         update = {
@@ -45,9 +49,16 @@ class TimerConsumer(AsyncWebsocketConsumer):
                     or abs(time_delta) > 3600:
                 print("Rejected text_data_json because of time_delta.")
                 return False
+
+            # Update DB record of the timer
+            timer: Timer = await self._update_timer(
+                self.timer_id,
+                delta_sec=time_delta
+            )
             update = {
                 "type": "update.time",
-                "time_delta": time_delta,
+                # "time_delta": time_delta,
+                "time_sync": timer.get_duration()
             }
         elif "new_state" in text_data_json:
             # Validate new_state
@@ -55,9 +66,17 @@ class TimerConsumer(AsyncWebsocketConsumer):
             if new_state not in ("Running", "Paused"):
                 print("Rejected text_data_json because of new_state.")
                 return False
+
+            # Update DB record of the timer
+            new_timer: Timer = await self._update_timer(
+                self.timer_id,
+                delta_sec=0,
+                state=new_state
+            )
             update = {
                 "type": "update.state",
                 "new_state": new_state,
+                "time_sync": new_timer.get_duration(),
             }
 
         await self.channel_layer.group_send(
@@ -67,26 +86,10 @@ class TimerConsumer(AsyncWebsocketConsumer):
 
     # Recieve message from room group
     async def update_time(self, event):
-        # Update DB record of the timer
-        _ = await self._update_timer(
-            self.timer_id,
-            delta_sec=event["time_delta"]
-        )
-
         # Send to WebSocket
         await self.send(text_data=json.dumps(event))
 
     async def update_state(self, event):
-        # Update DB record of the timer
-        new_timer = await self._update_timer(
-            self.timer_id,
-            delta_sec=0,
-            state=event["new_state"]
-        )
-
-        if event["new_state"] == "Paused":
-            event["time_sync"] = new_timer.get_duration()
-
         # Send to WebSocket
         await self.send(text_data=json.dumps(event))
 

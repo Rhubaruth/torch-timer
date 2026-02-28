@@ -8,4 +8,9 @@ urlpatterns = [
     path("add/", views.timer_add, name="timer_add"),
     path("detail/<int:timer_id>/", views.timer_detail, name="timer_detail"),
     path("edit/<int:timer_id>/", views.timer_edit, name="timer_edit"),
+    path(
+        "detail_dm/<int:timer_id>/",
+        views.timer_detail_owner,
+        name="timer_detail_dm"
+    ),
 ]

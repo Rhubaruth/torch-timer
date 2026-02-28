@@ -37,6 +37,26 @@
                 </tr>
             </table>
         </div>
+
+        <div class="timer-footer">
+            <!-- Buttons Row -->
+            <button id='time-pause' class="btn btn-outline" {% if timer.status == "Paused" %}hidden{% endif %}>
+                Pause
+            </button>
+            <button id='time-start' class="btn btn-dark btn-outline" {% if timer.status == "Running" %}hidden{% endif %}>
+                Start
+            </button>
+
+            <button id='time-add' class="btn btn-outline">
+                +5 mins
+            </button>
+            <button id='time-subtract' class="btn btn-outline">
+                -5 mins
+            </button>
+            <button class="btn btn-outline" onclick="location.href='{% url 'timer_edit' timer.id %}'">
+                Edit
+            </button>
+        </div>
     </div>
 </div>
 
@@ -48,6 +68,8 @@
     {{ timer.id|json_script:"timer-id" }}
     {{ timer.status|json_script:"timer-status" }}
     {{ seconds_left|json_script:"seconds-left" }}
+
+    {{ request.user.username |json_script:"user-token" }}
 
     <script src="{% static 'js/timer_detail.js' %}"></script>
 {% endblock %}

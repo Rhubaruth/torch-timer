@@ -1,6 +1,7 @@
 from django.shortcuts import render, redirect
 from django.contrib.auth.decorators import login_required
 from django.utils import timezone
+from django.http import HttpResponseForbidden
 
 from datetime import timedelta
 import json
@@ -22,9 +23,31 @@ def index(request):
 def timer_detail(request, timer_id):
     """ Display detail of a timer. """
     timer: Timer = Timer.objects.get(pk=timer_id)
-    timer.effective_end_time
 
-    print("IsOwner: ", request.user == timer.created_by)
+    duration = timer.get_duration()
+
+    context = {
+        'timer': timer,
+        'seconds_left': json.dumps(duration),
+        'timer_active': (timer.status == TimerState.RUNNING
+                         or timer.status == TimerState.PAUSED),
+    }
+
+    if timer.created_by == request.user:
+        return render(request, 'timers/timer_detail_dm.html', context)
+    return render(request, 'timers/timer_detail.html', context)
+
+
+
+@login_required
+def timer_detail_owner(request, timer_id):
+    """ Timer view for DM with additional buttons. """
+    timer: Timer = Timer.objects.get(pk=timer_id)
+
+    if timer.created_by != request.user:
+        return HttpResponseForbidden(
+            "You do not have permission for this view."
+        )
 
     duration = timer.get_duration()
     if timer.status == TimerState.RUNNING and timer.get_duration() > 0:
@@ -72,6 +95,7 @@ def timer_edit(request, timer_id):
     timer: Timer = Timer.objects.filter(
         created_by=request.user).get(pk=timer_id)
     timer.effective_duration = timedelta(seconds=int(timer.get_duration()))
+    timer.save()
     if request.method == 'POST' and "cancel" not in request.POST:
         form = TimerForm(request.POST, instance=timer)
 
