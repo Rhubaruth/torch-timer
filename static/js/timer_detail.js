@@ -125,13 +125,11 @@ chatSocket.onclose = function(e) {
 document.querySelector('#time-add').onclick = function(e) {
     chatSocket.send(JSON.stringify({
         "time_delta": 60*5.0,
-        "user_token": "test",
     }));
 };
 document.querySelector('#time-subtract').onclick = function(e) {
     chatSocket.send(JSON.stringify({
         "time_delta": 60*(-5.0),
-        "user_token": "test",
     }));
 };
 
@@ -140,12 +138,10 @@ document.querySelector('#time-pause').onclick = function(e) {
     console.log('Pausing at ' + seconds_left)
     chatSocket.send(JSON.stringify({
         "new_state": "Paused",
-        "user_token": "test",
     }));
 };
 document.querySelector('#time-start').onclick = function(e) {
     chatSocket.send(JSON.stringify({
         "new_state": "Running",
-        "user_token": "test",
     }));
 };
