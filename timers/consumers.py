@@ -3,9 +3,11 @@ from django.utils import timezone
 from datetime import timedelta
 
 from channels.generic.websocket import AsyncWebsocketConsumer
-from .models import Timer
+from .models import Timer, TimerState
 
 from channels.db import database_sync_to_async
+
+from math import floor
 
 
 class TimerConsumer(AsyncWebsocketConsumer):
@@ -51,10 +53,7 @@ class TimerConsumer(AsyncWebsocketConsumer):
                 return False
 
             # Update DB record of the timer
-            timer: Timer = await self._update_timer(
-                self.timer_id,
-                delta_sec=time_delta
-            )
+            timer: Timer = await self._update_timer_time(delta_sec=time_delta)
             update = {
                 "type": "update.time",
                 # "time_delta": time_delta,
@@ -68,14 +67,10 @@ class TimerConsumer(AsyncWebsocketConsumer):
                 return False
 
             # Update DB record of the timer
-            new_timer: Timer = await self._update_timer(
-                self.timer_id,
-                delta_sec=0,
-                state=new_state
-            )
+            new_timer: Timer = await self._update_timer_state()
             update = {
                 "type": "update.state",
-                "new_state": new_state,
+                "new_state": new_timer.state,
                 "time_sync": new_timer.get_duration(),
             }
 
@@ -94,18 +89,23 @@ class TimerConsumer(AsyncWebsocketConsumer):
         await self.send(text_data=json.dumps(event))
 
     @database_sync_to_async
-    def _update_timer(self, timer_id: int, delta_sec: float = 0, state=None):
-        # Update DB entry
-        timer: Timer = Timer.objects.get(pk=timer_id)
-        if delta_sec != 0:
-            updated_seconds = timer.get_duration() + delta_sec
-            timer.effective_duration = timedelta(seconds=int(updated_seconds))
-            timer.effective_end_time = timezone.now()+timer.effective_duration
-        if state:
-            timer.effective_duration = timedelta(
-                seconds=int(timer.get_duration()+1)
-            )
-            timer.effective_end_time = timezone.now()+timer.effective_duration
-            timer.status = state
+    def _update_timer_time(self, delta_sec: float = 0):
+        timer: Timer = Timer.objects.get(pk=self.timer_id)
+
+        updated_seconds = timer.get_duration() + delta_sec
+        timer.duration = timedelta(seconds=int(updated_seconds))
+
+        timer.save()
+        return timer
+
+    @database_sync_to_async
+    def _update_timer_state(self):
+        timer: Timer = Timer.objects.get(pk=self.timer_id)
+
+        if timer.state == TimerState.RUNNING:
+            timer.pause()
+        elif timer.state == TimerState.PAUSED:
+            timer.unpause()
+
         timer.save()
         return timer
