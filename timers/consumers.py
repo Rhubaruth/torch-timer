@@ -33,11 +33,16 @@ class TimerConsumer(AsyncWebsocketConsumer):
     # Recieve message from WebSocket
     async def receive(self, text_data):
         text_data_json = json.loads(text_data)
-        print("User Token: ", text_data_json["user_token"])
+        print("User: ", self.scope["user"],
+              "\nOwner: ", await _get_timer_owner(self.timer_id))
 
         # simple authentication
-        if not self.scope["user"].is_authenticated:
-            # await self.close(code=4003)  # AUTHENTICATION_REQUIRED
+        if not self.scope["user"].is_authenticated \
+                or self.scope["user"] != await _get_timer_owner(self.timer_id):
+            await self.send(text_data=json.dumps({
+                "type": "update.error",
+                "msg": "Not Authorised",
+            }))
             return
 
         # Send message to room group
@@ -49,11 +54,15 @@ class TimerConsumer(AsyncWebsocketConsumer):
             time_delta = text_data_json.get("time_delta")
             if not isinstance(time_delta, (int, float)) \
                     or abs(time_delta) > 3600:
-                print("Rejected text_data_json because of time_delta.")
-                return False
+                await self.send(text_data=json.dumps({
+                    "type": "update.error",
+                    "msg": "Invalid time_delta format.",
+                }))
+                return
 
             # Update DB record of the timer
-            timer: Timer = await self._update_timer_time(delta_sec=time_delta)
+            timer: Timer = await _update_timer_time(
+                self.timer_id, delta_sec=time_delta)
             update = {
                 "type": "update.time",
                 # "time_delta": time_delta,
@@ -63,11 +72,15 @@ class TimerConsumer(AsyncWebsocketConsumer):
             # Validate new_state
             new_state = text_data_json.get("new_state")
             if new_state not in ("Running", "Paused"):
-                print("Rejected text_data_json because of new_state.")
-                return False
+                await self.send(text_data=json.dump({
+                    "type": "update.error",
+                    "msg": "Invalid new_state format.",
+                }))
+                return
 
             # Update DB record of the timer
-            new_timer: Timer = await self._update_timer_state()
+            new_timer: Timer = await _update_timer_state(
+                self.timer_id, new_state)
             update = {
                 "type": "update.state",
                 "new_state": new_timer.state,
@@ -88,23 +101,31 @@ class TimerConsumer(AsyncWebsocketConsumer):
         # Send to WebSocket
         await self.send(text_data=json.dumps(event))
 
-    @database_sync_to_async
-    def _update_timer_time(self, delta_sec: float = 0):
-        timer: Timer = Timer.objects.get(pk=self.timer_id)
 
-        timer.duration += timedelta(seconds=delta_sec)
+@database_sync_to_async
+def _get_timer_owner(timer_id):
+    timer: Timer = Timer.objects.get(pk=timer_id)
+    return timer.created_by
 
-        timer.save()
-        return timer
 
-    @database_sync_to_async
-    def _update_timer_state(self):
-        timer: Timer = Timer.objects.get(pk=self.timer_id)
+@database_sync_to_async
+def _update_timer_time(timer_id: int, delta_sec: float = 0):
+    timer: Timer = Timer.objects.get(pk=timer_id)
 
-        if timer.state == TimerState.RUNNING:
-            timer.pause()
-        elif timer.state == TimerState.PAUSED:
-            timer.unpause()
+    timer.duration += timedelta(seconds=delta_sec)
 
-        timer.save()
-        return timer
+    timer.save()
+    return timer
+
+
+@database_sync_to_async
+def _update_timer_state(timer_id: int, new_state):
+    timer: Timer = Timer.objects.get(pk=timer_id)
+
+    if new_state == TimerState.RUNNING:
+        timer.unpause()
+    elif new_state == TimerState.PAUSED:
+        timer.pause()
+
+    timer.save()
+    return timer

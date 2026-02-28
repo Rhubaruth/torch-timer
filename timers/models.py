@@ -69,11 +69,15 @@ class Timer(models.Model):
         return duration / 60.0
 
     def pause(self):
+        if self.state != TimerState.RUNNING:
+            return
         self.last_pause_time = timezone.now()
         self.state = TimerState.PAUSED
         return
 
     def unpause(self):
+        if self.state != TimerState.PAUSED:
+            return
         self.total_paused_time += timezone.now() - self.last_pause_time
         print("TotalPause: ", self.total_paused_time)
         self.last_pause_time = None
