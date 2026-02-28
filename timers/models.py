@@ -19,6 +19,7 @@ class Timer(models.Model):
         User, related_name="timers",
         on_delete=models.CASCADE,
     )
+    created_at = models.DateTimeField(auto_now_add=True)
     title = models.CharField(max_length=32, default='')
 
     start_time = models.DateTimeField(auto_now_add=True)

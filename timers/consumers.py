@@ -92,8 +92,7 @@ class TimerConsumer(AsyncWebsocketConsumer):
     def _update_timer_time(self, delta_sec: float = 0):
         timer: Timer = Timer.objects.get(pk=self.timer_id)
 
-        updated_seconds = timer.get_duration() + delta_sec
-        timer.duration = timedelta(seconds=int(updated_seconds))
+        timer.duration += timedelta(seconds=delta_sec)
 
         timer.save()
         return timer
