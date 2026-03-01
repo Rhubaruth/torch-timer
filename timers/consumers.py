@@ -1,5 +1,4 @@
 import json
-from django.utils import timezone
 from datetime import timedelta
 
 from channels.generic.websocket import AsyncWebsocketConsumer
@@ -7,7 +6,8 @@ from .models import Timer, TimerState
 
 from channels.db import database_sync_to_async
 
-from math import floor
+
+VALID_STATES = {TimerState.RUNNING, TimerState.PAUSED}
 
 
 class TimerConsumer(AsyncWebsocketConsumer):
@@ -21,6 +21,10 @@ class TimerConsumer(AsyncWebsocketConsumer):
             self.channel_name
         )
 
+        # Get timer owner
+        self.timer_owner = await _get_timer_owner(self.timer_id)
+        self.has_permission = self.timer_owner == self.scope["user"]
+
         await self.accept()
 
     async def disconnect(self, close_code):
@@ -30,13 +34,12 @@ class TimerConsumer(AsyncWebsocketConsumer):
             self.channel_name
         )
 
-    # Recieve message from WebSocket
+    # Receive message from WebSocket
     async def receive(self, text_data):
         text_data_json = json.loads(text_data)
 
         # simple authentication
-        if not self.scope["user"].is_authenticated \
-                or self.scope["user"] != await _get_timer_owner(self.timer_id):
+        if not self.has_permission:
             await self.send(text_data=json.dumps({
                 "type": "update.error",
                 "msg": "Not Authorised",
@@ -44,9 +47,6 @@ class TimerConsumer(AsyncWebsocketConsumer):
             return
 
         # Send message to room group
-        update = {
-            "type": "update.error"
-        }
         if "time_delta" in text_data_json:
             # Validate time_delta
             time_delta = text_data_json.get("time_delta")
@@ -65,11 +65,16 @@ class TimerConsumer(AsyncWebsocketConsumer):
                 "type": "update.time",
                 "time_sync": timer.get_duration()
             }
+            await self.channel_layer.group_send(
+                self.timer_group,
+                update
+            )
+            return
         elif "new_state" in text_data_json:
             # Validate new_state
             new_state = text_data_json.get("new_state")
-            if new_state not in ("Running", "Paused"):
-                await self.send(text_data=json.dump({
+            if new_state not in VALID_STATES:
+                await self.send(text_data=json.dumps({
                     "type": "update.error",
                     "msg": "Invalid new_state format.",
                 }))
@@ -83,13 +88,17 @@ class TimerConsumer(AsyncWebsocketConsumer):
                 "new_state": new_timer.state,
                 "time_sync": new_timer.get_duration(),
             }
+            await self.channel_layer.group_send(
+                self.timer_group,
+                update
+            )
+            return
+        await self.send(text_data=json.dumps({
+            "type": "update.error",
+            "msg": "No update made.",
+        }))
 
-        await self.channel_layer.group_send(
-            self.timer_group,
-            update
-        )
-
-    # Recieve message from room group
+    # Receive message from room group
     async def update_time(self, event):
         # Send to WebSocket
         await self.send(text_data=json.dumps(event))
@@ -109,7 +118,8 @@ def _get_timer_owner(timer_id):
 def _update_timer_time(timer_id: int, delta_sec: float = 0):
     timer: Timer = Timer.objects.get(pk=timer_id)
 
-    timer.duration += timedelta(seconds=delta_sec)
+    new_duration = timer.duration + timedelta(seconds=delta_sec)
+    timer.duration = max(new_duration, timedelta(0))
 
     timer.save()
     return timer

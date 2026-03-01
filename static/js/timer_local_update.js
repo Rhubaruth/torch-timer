@@ -24,7 +24,7 @@ function update(delta) {
     secondsLeft -= delta
     updateTextTimeLeft()
     updateProgressTimeLeft()
-    console.log('Left: ' + secondsLeft + '   Delta ' + delta)
+    // console.log('Left: ' + secondsLeft + '   Delta ' + delta)
 
     // timeout
     if (secondsLeft <= 0 && interval != null) {

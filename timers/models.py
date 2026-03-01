@@ -51,38 +51,33 @@ class Timer(models.Model):
         if self.state in (TimerState.FINISHED, TimerState.DELETION):
             return 0.0
         now = timezone.now()
-        elapsed = now - self.start_time
-        duration_seconds = self.duration.seconds
-        paused_seconds = self.total_paused_time.seconds
+        paused_seconds = self.total_paused_time.total_seconds()
 
-        seconds_left = duration_seconds-elapsed.total_seconds()+paused_seconds
-        if self.state == TimerState.RUNNING:
-            return max(0, seconds_left)
-        return max(0, seconds_left+(now-self.last_pause_time).seconds)
+        if self.state == TimerState.PAUSED:
+            paused_seconds += (now - self.last_pause_time).total_seconds()
+
+        elapsed = (now - self.start_time).total_seconds() - paused_seconds
+        return max(0.0, self.duration.total_seconds() - elapsed)
 
     def get_duration_minutes(self, approx: bool = True) -> float:
         duration = self.get_duration()
-        if duration < 0:
-            return 0
         if approx:
             return floor(duration / (60 * 5)) * 5
         return duration / 60.0
 
     def pause(self):
-        if self.state != TimerState.RUNNING:
+        if self.state in (TimerState.FINISHED, TimerState.DELETION):
             return
-        self.last_pause_time = timezone.now()
+        self.last_pause_time = self.last_pause_time or timezone.now()
         self.state = TimerState.PAUSED
-        return
 
     def unpause(self):
-        if self.state != TimerState.PAUSED:
+        if self.state in (TimerState.FINISHED, TimerState.DELETION) \
+                or not self.last_pause_time:
             return
         self.total_paused_time += timezone.now() - self.last_pause_time
-        print("TotalPause: ", self.total_paused_time)
         self.last_pause_time = None
         self.state = TimerState.RUNNING
-        return
 
     def terminate_if_finished(self) -> bool:
         # Do nothing for timers with remaining duration

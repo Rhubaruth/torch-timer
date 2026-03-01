@@ -4,7 +4,14 @@ const buttonSubtract = document.getElementById('button-time-subtract')
 const buttonStart = document.getElementById('button-time-start')
 const buttonPause = document.getElementById('button-time-pause')
 
+const hasOwnerControls = buttonStart && buttonPause
+
 // Constants
+const STATE = {
+    RUNNING: "Running",
+    PAUSED: "Paused",
+    FINISHED: "Finished",
+}
 const timerId = JSON.parse(document.getElementById('var-timerid').textContent)
 const chatSocket = new WebSocket(
     'ws://'
@@ -20,16 +27,16 @@ function update_state(new_state) {
     if(textState != null) {
         textState.innerText = new_state
     }
-    if(new_state == "Running") {
+    if(new_state == STATE.RUNNING) {
         interval = setInterval(update, period * 1000, period)
-        if(buttonStart && buttonPause) {
+        if(hasOwnerControls) {
             buttonStart.hidden = true
             buttonPause.hidden = false
         }
-    } else if(new_state == "Paused") {
+    } else if(new_state == STATE.PAUSED) {
         clearInterval(interval)
         interval = null
-        if(buttonStart && buttonPause) {
+        if(hasOwnerControls) {
             buttonStart.hidden = false
             buttonPause.hidden = true
         }
@@ -38,7 +45,6 @@ function update_state(new_state) {
 
 chatSocket.onmessage = function(e) {
     const data = JSON.parse(e.data)
-    console.log(data)
 
     if(data.type == "update.error") {
         console.error('Error' + data.msg)
@@ -53,6 +59,8 @@ chatSocket.onmessage = function(e) {
 
 chatSocket.onclose = function(e) {
     console.error('Chat socket closed unexpectedly')
+    // Reconnect
+    setTimeout(chatSocket.connect, 3000)
 }
 
 // Add-Remove

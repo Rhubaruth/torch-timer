@@ -19,18 +19,18 @@
                 </tr>
                 <tr>
                     <th>Author:</th>
-                    <td>{{ timer.created_by|capfirst }}</td>
+                    <td>{{ timer.created_by.username }}</td>
                 </tr>
                 <tr>
                     <th>Status:</th>
                     <td id="text-state">{{ timer.state }}</td>
                 </tr>
                 {% if is_owner %}
+                {% endif %}
                 <tr>
                     <th>Duration:</th>
                     <td id="text-time">{{ timer.duration }}</td>
                 </tr>
-                {% endif %}
 
                 <tr>
                     <td colspan="2">
@@ -41,6 +41,7 @@
         </div>
 
         {% if is_owner %}
+        {% endif %}
         <div class="timer-footer">
             <!-- Buttons Row -->
             <button id='button-time-pause' class="btn btn-outline" {% if timer.state == "Paused" %}hidden{% endif %}>
@@ -56,11 +57,10 @@
             <button id='button-time-subtract' class="btn btn-outline">
                 -5 mins
             </button>
-            <button class="btn btn-outline" onclick="location.href='{% url 'timer_edit' timer.id %}'">
+            <a href="{% url 'timer_edit' timer.id %}" class="btn btn-outline">
                 Edit
-            </button>
+            </a>
         </div>
-        {% endif %}
     </div>
 </div>
 
