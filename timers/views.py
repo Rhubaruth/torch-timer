@@ -32,10 +32,11 @@ def timer_detail(request, timer_id):
         'seconds_left': json.dumps(duration),
         'timer_active': (timer.state == TimerState.RUNNING
                          or timer.state == TimerState.PAUSED),
+        'is_owner': timer.created_by == request.user
     }
 
-    if timer.created_by == request.user:
-        return render(request, 'timers/timer_detail_dm.html', context)
+    # if timer.created_by == request.user:
+    #     return render(request, 'timers/timer_detail_dm.html', context)
     return render(request, 'timers/timer_detail.html', context)
 
 

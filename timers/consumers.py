@@ -33,8 +33,6 @@ class TimerConsumer(AsyncWebsocketConsumer):
     # Recieve message from WebSocket
     async def receive(self, text_data):
         text_data_json = json.loads(text_data)
-        print("User: ", self.scope["user"],
-              "\nOwner: ", await _get_timer_owner(self.timer_id))
 
         # simple authentication
         if not self.scope["user"].is_authenticated \
@@ -65,7 +63,6 @@ class TimerConsumer(AsyncWebsocketConsumer):
                 self.timer_id, delta_sec=time_delta)
             update = {
                 "type": "update.time",
-                # "time_delta": time_delta,
                 "time_sync": timer.get_duration()
             }
         elif "new_state" in text_data_json:
