@@ -3,11 +3,14 @@ from django.contrib.auth.models import User
 from datetime import timedelta
 from django.utils import timezone
 
+from math import floor
+
 
 class TimerState(models.TextChoices):
-    FINISHED = "Finished"
     RUNNING = "Running"
     PAUSED = "Paused"
+    FINISHED = "Finished"
+    DELETION = "Deletion"
 
 
 # Create your models here.
@@ -17,52 +20,73 @@ class Timer(models.Model):
         on_delete=models.CASCADE,
     )
     created_at = models.DateTimeField(auto_now_add=True)
-
     title = models.CharField(max_length=32, default='')
 
-    init_duration = models.DurationField(
-        blank=False,
-        null=False,
-        default=timedelta(hours=1),
-    )
-    effective_duration = models.DurationField(
+    start_time = models.DateTimeField(auto_now_add=True)
+    duration = models.DurationField(
         blank=False,
         null=False,
         default=timedelta(hours=1),
     )
 
-    effective_end_time = models.DateTimeField(
+    last_pause_time = models.DateTimeField(null=True, default=None)
+    total_paused_time = models.DurationField(
         blank=False,
         null=False,
-        default=timezone.now() + timedelta(hours=1),
+        default=timedelta(hours=0),
     )
 
-    status = models.CharField(
+    state = models.CharField(
         max_length=12,
-        choices=TimerState,
+        choices=[
+            ("Running", TimerState.RUNNING),
+            ("Paused", TimerState.PAUSED),
+            ("Finished", TimerState.FINISHED),
+        ],
         default=TimerState.RUNNING
     )
 
     def get_duration(self) -> float:
         """ Returns remaining duration of the timer in seconds """
-        if self.status == TimerState.RUNNING:
-            return (self.effective_end_time - timezone.now()).total_seconds()
-        return self.effective_duration.total_seconds()
-    
-    def get_duration_minutes(self) -> float:
+        if self.state in (TimerState.FINISHED, TimerState.DELETION):
+            return 0.0
+        now = timezone.now()
+        paused_seconds = self.total_paused_time.total_seconds()
+
+        if self.state == TimerState.PAUSED:
+            paused_seconds += (now - self.last_pause_time).total_seconds()
+
+        elapsed = (now - self.start_time).total_seconds() - paused_seconds
+        return max(0.0, self.duration.total_seconds() - elapsed)
+
+    def get_duration_minutes(self, approx: bool = True) -> float:
         duration = self.get_duration()
-        if duration < 0:
-            return 0
+        if approx:
+            return floor(duration / (60 * 5)) * 5
         return duration / 60.0
+
+    def pause(self):
+        if self.state in (TimerState.FINISHED, TimerState.DELETION):
+            return
+        self.last_pause_time = self.last_pause_time or timezone.now()
+        self.state = TimerState.PAUSED
+
+    def unpause(self):
+        if self.state in (TimerState.FINISHED, TimerState.DELETION) \
+                or not self.last_pause_time:
+            return
+        self.total_paused_time += timezone.now() - self.last_pause_time
+        self.last_pause_time = None
+        self.state = TimerState.RUNNING
 
     def terminate_if_finished(self) -> bool:
         # Do nothing for timers with remaining duration
+        if self.state in (TimerState.FINISHED, TimerState.DELETION):
+            return False
         if self.get_duration() > 0:
             return False
 
-        self.effective_duration = timedelta()
-        self.effective_end_time = timezone.now()
-        self.status = TimerState.FINISHED
+        self.state = TimerState.FINISHED
 
         self.save()
         return True

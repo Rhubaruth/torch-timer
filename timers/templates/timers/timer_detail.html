@@ -7,40 +7,61 @@
 
 {% block content %}
 
-{{ timer.id|json_script:"timer-id" }}
 
 <div class="timer-part">
     <!-- First Timer -->
-    <div class="container">
-        <div class="title">
-            <strong>Timer:</strong> {{ timer.title|capfirst }}
-        </div>
+    <div class="timer-container border">
         <div>
-            <strong>Author:</strong> {{ timer.created_by|capfirst }}
-        </div>
-        <div>
-            <progress id="timer-bar" value="30" max="30"></progress>
-            <div><strong>Status:</strong> {{ timer.status }}</div>
-            {% if request.user.is_authenticated and request.user == timer.created_by %}
-                <div><strong>Real Duration:</strong>
-                    {{ timer.effective_duration }}
-                </div>
-            {% endif %}
+            <table>
+                <tr class="title">
+                    <th>Timer:</th>
+                    <td>{{ timer.title|capfirst }}</td>
+                </tr>
+                <tr>
+                    <th>Author:</th>
+                    <td>{{ timer.created_by.username }}</td>
+                </tr>
+                <tr>
+                    <th>Status:</th>
+                    <td id="text-state">{{ timer.state }}</td>
+                </tr>
+                {% if is_owner %}
+                {% endif %}
+                <tr>
+                    <th>Duration:</th>
+                    <td id="text-time">{{ timer.duration }}</td>
+                </tr>
+
+                <tr>
+                    <td colspan="2">
+                    <progress id="progress-time" value="30" max="30"></progress>
+                    </td>
+                </tr>
+            </table>
         </div>
 
-        {% if request.user.is_authenticated and request.user == timer.created_by %}
-        <div class="footer">
-            <!-- Buttons Row -->
-            <button id='time-add' class="timer-button">+10 mins</button>
-            <button id='time-subtract' class="timer-button">-10 mins</button>
-            <button class="timer-button" onclick="location.href='{% url 'timer_edit' timer.id %}'">
-                Edit
-            </button>
-        </div>
+        {% if is_owner %}
         {% endif %}
-    </div>
+        <div class="timer-footer">
+            <!-- Buttons Row -->
+            <button id='button-time-pause' class="btn btn-outline" {% if timer.state == "Paused" %}hidden{% endif %}>
+                Pause
+            </button>
+            <button id='button-time-start' class="btn btn-dark btn-outline" {% if timer.state == "Running" %}hidden{% endif %}>
+                Start
+            </button>
 
-    <!-- Second timer -->
+            <button id='button-time-add' class="btn btn-outline">
+                +5 mins
+            </button>
+            <button id='button-time-subtract' class="btn btn-outline">
+                -5 mins
+            </button>
+            <a href="{% url 'timer_edit' timer.id %}" class="btn btn-outline">
+                Edit
+            </a>
+        </div>
+    </div>
 </div>
 
 
@@ -48,67 +69,12 @@
 
 
 {% block scripts %}
-<script>
-    // Update timer locally
-    const container = document.getElementById('square-container');
-    const timerBar = document.getElementById('timer-bar');
-    var seconds_left = JSON.parse("{{seconds_left | escapejs }}");
-    console.log((seconds_left / 60).toFixed(3));
+    {{ timer.id|json_script:"var-timerid" }}
+    {{ timer.state|json_script:"var-state" }}
+    {{ seconds_left|json_script:"var-seconds" }}
+    {{ 1|json_script:"var-period"}}
 
-    function updateTimerBar() {
-        var timer_value = seconds_left / 60 / 2;
-
-        if (timer_value > timerBar.max) {
-            timerBar.value = timerBar.max;
-        } else if (timer_value <= 0) {
-            clearInterval(interval);
-            timerBar.value = 0;
-        } else {
-            timerBar.value = timer_value;
-        }
-    }
-
-    function updateTime() {
-        seconds_left -= 30;
-        updateTimerBar();
-    }
-
-    const interval = setInterval(updateTime, 30 * 1000)
-    updateTimerBar();
-
-
-    // WebSocket
-    const timerId = JSON.parse(document.getElementById('timer-id').textContent);
-
-    const chatSocket = new WebSocket(
-        'ws://'
-        + window.location.host
-        + '/ws/timer/detail/'
-        + timerId
-        + '/'
-    );
-
-    chatSocket.onmessage = function(e) {
-        const data = JSON.parse(e.data);
-        seconds_left += data.time_delta;
-        updateTimerBar();
-    };
-
-    chatSocket.onclose = function(e) {
-        console.error('Chat socket closed unexpectedly');
-    };
-
-    {% if request.user.is_authenticated and request.user == timer.created_by %}
-    document.querySelector('#time-add').onclick = function(e) {
-        chatSocket.send(JSON.stringify({
-            'message': 60*10.0
-        }));
-    };
-    document.querySelector('#time-subtract').onclick = function(e) {
-        chatSocket.send(JSON.stringify({
-            'message': 60*(-10.0)
-        }));
-    };
-    {% endif %}
-</script>
+    <script src="{% static 'js/play_sound.js' %}"></script>
+    <script src="{% static 'js/timer_local_update.js' %}"></script>
+    <script src="{% static 'js/timer_websocket.js' %}"></script>
 {% endblock %}

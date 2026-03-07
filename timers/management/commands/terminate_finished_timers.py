@@ -13,7 +13,7 @@ class Command(BaseCommand):
     def handle(self, *args, **options):
         print('TimerTermination')
 
-        timers = Timer.objects.exclude(status=TimerState.FINISHED)
+        timers = Timer.objects.exclude(state=TimerState.FINISHED)
         terminations = [int(t.terminate_if_finished()) for t in timers]
 
         print(f'Terminated {sum(terminations)}/{len(terminations)} timer(s).')
