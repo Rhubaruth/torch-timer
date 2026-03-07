@@ -17,7 +17,7 @@
 <div class="timer-grid">
     {% for timer in timers %}
     <div class="timer-container border">
-            <strong>{{ timer.title }}</strong> [<em>{{ timer.status }}</em>]
+            <strong>{{ timer.title }}</strong> [<em>{{ timer.state }}</em>]
             <br>
             <strong>Author:</strong> {{ timer.created_by|capfirst }}
             <br>
